@@ -14,4 +14,63 @@
         <input type="text" name="quantity"  placeholder="quantity">
         <button type="submit">add pd</button>
    </form>
+   <div id="products">
+       
+   </div>
+   <div id="update"></div>
+   <script>
+       fetch('/products')
+       .then(res => res.json())
+       .then(products => {
+           const container = document.getElementById('products')
+           products.forEach(pd => {
+                 const p = document.createElement('p')
+                 p.innerHTML = `name: ${pd.name}.. <br> price: ${pd.price} <br>
+                 <button onclick="updateProduct('${pd._id}')"> update </button>
+                 <button onclick="deleteProduct(event,'${pd._id}')"> delete </button>
+                 `
+                 container.appendChild(p);
+           });  
+       })
+        function updateProduct(id){
+            fetch(`/product/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                const update = document.getElementById('update')
+                update.innerHTML = `
+                price:  <input type="text" value="${data.price}" id="price">
+                <button onclick="updatePd('${data._id}')">Submit</button>
+                `;
+            })
+        }
+        function updatePd(id){
+            console.log('hit')
+            const price = document.getElementById('price').value 
+            const product = {id, price}
+            fetch(`/update/${id}`, {
+                method: 'PATCH',
+                headers: {'content-Type': 'application/json'},
+                body: JSON.stringify(product)
+            })
+            .then(res => res.json())
+            .then(result=> {
+                if(result){
+                    updateProduct()
+                }
+            })
+        }
+        
+       function deleteProduct(event, id){
+           fetch(`/delete/${id}`, {
+               method: 'DELETE'
+           })
+           .then(res => res.json())
+           .then(result => {
+              if(result){
+                  event.target.parentNode.style.display ='none';
+              }
+           })
+       }
+   </script>
+</body>
 </html>
